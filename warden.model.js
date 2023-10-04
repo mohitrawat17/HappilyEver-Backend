@@ -1,6 +1,4 @@
 const mongoose = require("mongoose");
-// const Slot=require('./slot.model')
-
 
 const WardenSchema = new mongoose.Schema({
   name: {
@@ -16,17 +14,13 @@ const WardenSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  time:{
-    type:String
+  time: {
+    type: String,
   },
-  booked:{
-    type:Boolean,
-    default :false
-  }
-  //  bookSlot:{
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: 'Slot'
-  //  }
+  booked: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const Warden = mongoose.model("Warden", WardenSchema);

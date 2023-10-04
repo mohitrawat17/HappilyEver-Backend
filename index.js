@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const Warden = require("./warden.model");
-const Session =require('./slot.model')
+const Session = require("./slot.model");
 
 const app = express();
 
@@ -26,21 +26,19 @@ app.post("/register", async (req, res) => {
   }
 });
 
-
-
-
 app.post("/login", async (req, res) => {
-  const user = await Warden.findOne(
-    { universityID: req.body.universityID, password: req.body.password },
-  );
+  const user = await Warden.findOne({
+    universityID: req.body.universityID,
+    password: req.body.password,
+  });
   if (!user) {
     res.send({ status: "error", error: "Invalid Password or Id" });
-  } 
+  }
 
-
-
-
-  const pendingSessions=await Session.find({bookedWith:user._id},{_id:0})
+  const pendingSessions = await Session.find(
+    { bookedWith: user._id },
+    { _id: 0 }
+  );
 
   try {
     if (pendingSessions) {
@@ -50,31 +48,20 @@ app.post("/login", async (req, res) => {
         },
         "secret123"
       );
-      res.send({ status: "ok", token: token,
-       Sessions:pendingSessions
-       });
-    } 
-    else {
+      res.send({ status: "ok", token: token, Sessions: pendingSessions });
+    } else {
       const token = jwt.sign(
         {
           universityID: user.universityID,
         },
         "secret123"
       );
-      res.send({ status: "ok", token: token});
+      res.send({ status: "ok", token: token });
     }
+  } catch (error) {
+    res.send({ status: "error", error: error.message });
   }
-  
-  catch (error) {
-    res.send({status:"error",error:error.message})
-  }
-
- 
-
-  
 });
-
-
 
 // Route for fetching available slots
 app.get("/slots", async (req, res) => {
@@ -92,66 +79,6 @@ app.get("/slots", async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // Route for booking a slot
-// app.post("/book-slot", async (req, res) => {
-//   const { universityID, day, time } = req.body;
-//   const token = req.headers["x-access-token"];
-
-//   try {
-//     const warden = jwt.verify(token, "secret123");
-
-//     const existingSlot = await Warden.findOne({ universityID, booked: false });
-//     const user = await Warden.findOne({ universityID: warden.universityID });
-
-//     if (existingSlot) {
-//       //updating user who is booking meeting
-//       user.booked = true;
-//       user.sessionWith.push({
-//         wardenName: existingSlot.name,
-//         day: day,
-//         time: time,
-//       });
-//       await user.save();
-
-//       //updating user who is booked for meeting
-//       existingSlot.sessionWith.push({
-//         wardenName: user.name,
-//         day: day,
-//         time: time,
-//       });
-//       await existingSlot.save();
-//       res.json({ message: "Slot booked successfully!" });
-//     } else {
-//       res.status(404).json({ error: "Slot not available for booking" });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// })
-
-
-
 app.post("/book-slot", async (req, res) => {
   const { universityID, day, time } = req.body;
   const token = req.headers["x-access-token"];
@@ -159,15 +86,15 @@ app.post("/book-slot", async (req, res) => {
   try {
     const warden = jwt.verify(token, "secret123");
 
-    const existingSlot = await Warden.findOne({ universityID, booked: false });  // warden with whom we are booking session slot
-    
+    const existingSlot = await Warden.findOne({ universityID, booked: false }); // warden with whom we are booking session slot
+
     const user = await Warden.findOne({ universityID: warden.universityID }); // warden who is booking slot
 
     if (existingSlot) {
       // Create session for the booking
       const session = new Session({
         wardenID: user._id,
-        bookedWith:existingSlot._id,
+        bookedWith: existingSlot._id,
         day: day,
         time: time,
       });
@@ -189,18 +116,6 @@ app.post("/book-slot", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
 
 app.listen(1000, () => {
   console.log("running on Port 1000");

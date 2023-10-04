@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-// const Warden=require('./warden.model')
 
 const slotSchema = new mongoose.Schema({
     wardenID: {
